@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: cash-money-postgres-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-cash_money}
+      # Performance tuning for production
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - cash-money-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-cash_money}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    # Security: Don't expose port externally in production
+    # Only the app service needs access via internal network
+    # Uncomment below only if you need external database access
+    # ports:
+    #   - '5432:5432'
+
+  # Cash Money Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cash-money-app:latest
+    container_name: cash-money-app-prod
+    restart: unless-stopped
+    ports:
+      - '${APP_PORT:-3000}:3000'
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cash_money}
+      # Add any other environment variables your app needs
+      # PORT: 3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - cash-money-network
+    healthcheck:
+      test: ['CMD', 'node', '-e', "require('http').get('http://localhost:3000/api/v1/hello', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+networks:
+  cash-money-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

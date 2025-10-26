@@ -7,14 +7,17 @@ This guide covers deploying the Cash Money application to a Synology NAS using D
 ### On Your Synology NAS
 
 1. **Docker/Container Manager Installed**
+
    - Open Package Center
    - Install "Container Manager" (or "Docker" on older DSM versions)
 
 2. **Portainer Installed** (Recommended)
+
    - Already installed and accessible at `http://your-synology-ip:9000`
    - If not installed, see "Installing Portainer" section below
 
 3. **SSH Access Enabled** (for file transfer)
+
    - Control Panel → Terminal & SNMP
    - Enable SSH service
    - Note your Synology's IP address
@@ -85,6 +88,7 @@ nano .env.production
 ```
 
 **Required updates:**
+
 - `POSTGRES_PASSWORD` - Use the generated secure password
 - `APP_PORT` - Change if port 3000 is already in use (default: 3000)
 
@@ -113,19 +117,23 @@ Alternatively, use an SFTP client like FileZilla to copy the files to `/volume1/
 ### Step 4A: Deploy Using Portainer (Recommended)
 
 1. **Access Portainer**
+
    - Open `http://your-synology-ip:9000` in your browser
    - Log in with your credentials
 
 2. **Navigate to Stacks**
+
    - Click "Stacks" in the left sidebar
    - Click "+ Add stack"
 
 3. **Create the Stack**
+
    - **Name**: `cash-money`
    - **Build method**: Select "Upload from your computer"
    - **Upload**: Select `docker-compose.production.yml` from your project
 
 4. **Configure Environment Variables**
+
    - Scroll down to "Environment variables"
    - Click "+ add an environment variable" for each:
      - `POSTGRES_USER` = `postgres`
@@ -134,6 +142,7 @@ Alternatively, use an SFTP client like FileZilla to copy the files to `/volume1/
      - `APP_PORT` = `3000`
 
 5. **Deploy**
+
    - Click "Deploy the stack"
    - Wait for both services to start (you'll see green status indicators)
 
@@ -198,6 +207,7 @@ If you're running Nginx Proxy Manager in Portainer:
 ### 2. Set Up SSL Certificate
 
 **Using DSM:**
+
 1. Control Panel → Security → Certificate
 2. Add a new certificate (Let's Encrypt recommended)
 3. Assign it to your reverse proxy
@@ -281,50 +291,59 @@ sudo chmod +x /volume1/docker/cash-money/scripts/backup.sh
 ### Using Portainer
 
 **View Logs:**
+
 1. Stacks → cash-money → Click container name
 2. Click "Logs"
 3. Toggle "Auto-refresh" for live logs
 
 **Restart Services:**
+
 1. Stacks → cash-money
 2. Click "Stop" then "Start"
-OR
-1. Containers → Select container
-2. Click "Restart"
+   OR
+3. Containers → Select container
+4. Click "Restart"
 
 **Update Application:**
+
 1. Build new version locally: `npx nx build cash-money --configuration=production`
 2. Transfer files to Synology via rsync/SFTP
 3. In Portainer: Stacks → cash-money → "Pull and redeploy"
-OR
+   OR
 4. Containers → cash-money-app-prod → "Recreate"
 
 **Monitor Resources:**
+
 1. Containers → Select container
 2. Click "Stats" to view CPU/Memory usage in real-time
 
 **Stop Services:**
+
 1. Stacks → cash-money → "Stop"
-(Data is preserved in volumes)
+   (Data is preserved in volumes)
 
 **Remove Everything:**
+
 1. Stacks → cash-money → "Delete this stack"
 2. Check "Remove associated volumes" only if you want to delete data (WARNING)
 
 ### Using Command Line
 
 **View Logs:**
+
 ```bash
 sudo docker compose -f docker-compose.production.yml logs -f
 sudo docker compose -f docker-compose.production.yml logs -f app
 ```
 
 **Restart Services:**
+
 ```bash
 sudo docker compose -f docker-compose.production.yml restart
 ```
 
 **Update Application:**
+
 ```bash
 # After transferring new files
 cd /volume1/docker/cash-money
@@ -333,6 +352,7 @@ sudo docker compose -f docker-compose.production.yml up -d app
 ```
 
 **Stop Services:**
+
 ```bash
 sudo docker compose -f docker-compose.production.yml down
 ```
@@ -342,6 +362,7 @@ sudo docker compose -f docker-compose.production.yml down
 ### Manual Backup via Portainer
 
 1. **Create Backup:**
+
    - Containers → cash-money-postgres-prod → Console → Connect
    - Run: `pg_dump -U postgres cash_money > /tmp/backup.sql`
    - Download from container using Portainer file browser
@@ -366,10 +387,12 @@ cat backup.sql | sudo docker exec -i cash-money-postgres-prod psql -U postgres c
 For complete data backup including the database volume:
 
 **Via Portainer:**
+
 1. Volumes → cash-money_postgres_data
 2. Use Portainer's backup plugins or manual volume copy
 
 **Via CLI:**
+
 ```bash
 # Backup volume
 sudo docker run --rm \
@@ -395,6 +418,7 @@ sudo docker run --rm \
 ### Health Checks
 
 Both services have health checks:
+
 - **Postgres**: Checks database connectivity every 10s
 - **App**: Checks HTTP endpoint every 30s
 
@@ -405,11 +429,13 @@ View health status in Portainer's container list (heart icon).
 ### Application Won't Start
 
 **Via Portainer:**
+
 1. Stacks → cash-money → cash-money-app-prod
 2. Click "Logs" to view errors
 3. Check "Inspect" tab for configuration issues
 
 **Common issues:**
+
 - Database not ready: Wait for postgres health check to pass
 - Environment variables missing: Check stack environment variables
 - Build failed: Check logs during deployment
@@ -417,6 +443,7 @@ View health status in Portainer's container list (heart icon).
 ### Database Connection Failed
 
 **Via Portainer:**
+
 1. Check postgres container is "running" and "healthy"
 2. View postgres logs for connection errors
 3. Console into app container:
@@ -428,20 +455,24 @@ View health status in Portainer's container list (heart icon).
 ### Port Already in Use
 
 **Via Portainer:**
+
 1. Stacks → cash-money → Editor
 2. Change port mapping or update `APP_PORT` environment variable
 3. Redeploy stack
 
 **Via DSM:**
+
 - Check Container Manager for port conflicts
 - Modify `APP_PORT` in Portainer environment variables
 
 ### View All Running Containers
 
 **Via Portainer:**
+
 - Containers → Shows all containers with status and ports
 
 **Via CLI:**
+
 ```bash
 sudo docker ps
 ```
@@ -449,27 +480,32 @@ sudo docker ps
 ## Security Best Practices
 
 1. **Strong Passwords**
+
    - Use minimum 20-character passwords
    - Generate with: `openssl rand -base64 32`
    - Store in password manager
 
 2. **Portainer Security**
+
    - Use strong admin password
    - Enable 2FA in Portainer (Settings → Authentication)
    - Restrict Portainer access via firewall
 
 3. **Network Security**
+
    - Use reverse proxy with HTTPS
    - Don't expose database port (5432) externally
    - Keep postgres within Docker network only
 
 4. **Regular Updates**
+
    - Update DSM regularly
    - Update Docker images:
      - Portainer: Stacks → cash-money → "Pull and redeploy"
    - Update Portainer itself periodically
 
 5. **Regular Backups**
+
    - Automated daily database backups
    - Test restore procedures monthly
    - Store backups off-site or in cloud
@@ -492,6 +528,7 @@ sudo nano /volume1/docker/cash-money/postgres.conf
 ```
 
 Add:
+
 ```conf
 # Memory settings (adjust based on available RAM)
 shared_buffers = 256MB
@@ -530,6 +567,7 @@ In Portainer, you can set resource limits:
    - CPU limit: 1.0
 
 Or edit the compose file to add:
+
 ```yaml
 services:
   app:
@@ -543,12 +581,15 @@ services:
 ## Quick Reference Commands
 
 ### Portainer Access
+
 - URL: `http://your-synology-ip:9000`
 
 ### Application Access
+
 - URL: `http://your-synology-ip:3000`
 
 ### SSH Commands
+
 ```bash
 # SSH into Synology
 ssh admin@your-synology-ip

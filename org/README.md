@@ -7,6 +7,7 @@ A self-employed income and expense tracking application for UK tax purposes, bui
 This application supports tracking spending and income as a self-employed individual in the United Kingdom.
 
 ### Features
+
 - Import bank statements from CSV files
 - Categorise transactions
 - Generate reports on spending and income
@@ -15,6 +16,7 @@ This application supports tracking spending and income as a self-employed indivi
 ## Technology Stack
 
 Built with the **Spartan Stack**:
+
 - **Nx** - Monorepo management and build system
 - **AnalogJS** - Full-stack Angular meta-framework
 - **Angular** - Frontend framework
@@ -57,16 +59,19 @@ This project uses **PostgreSQL** running in Docker locally, with support for fut
 ### Local Development Setup
 
 1. **Start PostgreSQL container:**
+
    ```bash
    docker compose up -d
    ```
 
 2. **Verify container is running:**
+
    ```bash
    docker compose ps
    ```
 
 3. **View database logs:**
+
    ```bash
    docker compose logs postgres
    ```
@@ -80,16 +85,19 @@ This project uses **PostgreSQL** running in Docker locally, with support for fut
 ### Database Management
 
 **Stop the database:**
+
 ```bash
 docker compose down
 ```
 
 **Stop and remove all data:**
+
 ```bash
 docker compose down -v
 ```
 
 **Restart the database:**
+
 ```bash
 docker compose restart postgres
 ```
@@ -97,6 +105,7 @@ docker compose restart postgres
 ### Database Schema
 
 The initial schema is located in `db/init/01-schema.sql` and includes:
+
 - `note` table (example from Spartan Stack)
 - Prepared structure for future tables:
   - `transactions` - Bank transactions
@@ -113,6 +122,7 @@ When ready to migrate to your Synology NAS:
 ### 1. Deploy PostgreSQL on NAS
 
 Copy `docker-compose.yml` to your NAS and run:
+
 ```bash
 docker compose up -d
 ```
@@ -120,6 +130,7 @@ docker compose up -d
 ### 2. Update Environment Variables
 
 Update `.env` file with your NAS IP address:
+
 ```
 DATABASE_URL="postgresql://postgres:your-secure-password@your-nas-ip:5432/cash_money"
 ```
@@ -141,12 +152,12 @@ docker compose exec postgres pg_dump -U postgres cash_money > backup.sql
 psql -h your-nas-ip -U postgres cash_money < backup.sql
 ```
 
-
 ## Development Workflow
 
 ### Running the Application
 
 **Start development server:**
+
 ```bash
 npx nx serve cash-money
 ```
@@ -154,11 +165,13 @@ npx nx serve cash-money
 The application will be available at `http://localhost:4200`
 
 **Build for production:**
+
 ```bash
 npx nx build cash-money
 ```
 
 **Run production build:**
+
 ```bash
 node dist/cash-money/analog/server/index.mjs
 ```
@@ -166,11 +179,13 @@ node dist/cash-money/analog/server/index.mjs
 ### Running Tests
 
 **Unit tests:**
+
 ```bash
 npx nx test cash-money
 ```
 
 **E2E tests:**
+
 ```bash
 npx nx e2e cash-money-e2e
 ```
@@ -178,11 +193,13 @@ npx nx e2e cash-money-e2e
 ### Code Quality
 
 **Lint:**
+
 ```bash
 npx nx lint cash-money
 ```
 
 **Format code:**
+
 ```bash
 npx prettier --write .
 ```
@@ -212,17 +229,20 @@ org/
 If you need to completely rebuild the project:
 
 1. **Remove all dependencies and builds:**
+
    ```bash
    rm -rf node_modules dist .nx
    docker compose down -v
    ```
 
 2. **Reinstall dependencies:**
+
    ```bash
    npm install --legacy-peer-deps
    ```
 
 3. **Restart database:**
+
    ```bash
    docker compose up -d
    ```
@@ -238,16 +258,19 @@ If you need to completely rebuild the project:
 ### Database Connection Issues
 
 **Check if PostgreSQL is running:**
+
 ```bash
 docker compose ps
 ```
 
 **View database logs:**
+
 ```bash
 docker compose logs postgres
 ```
 
 **Restart database:**
+
 ```bash
 docker compose restart postgres
 ```
@@ -255,6 +278,7 @@ docker compose restart postgres
 ### Node Module Issues
 
 If you encounter peer dependency conflicts:
+
 ```bash
 npm install --legacy-peer-deps
 ```
@@ -265,17 +289,20 @@ If port 5432 or 4200 is already in use:
 
 **For database (5432):**
 Update `docker-compose.yml` to use a different port:
+
 ```yaml
 ports:
-  - "5433:5432"  # Use 5433 on host instead
+  - '5433:5432' # Use 5433 on host instead
 ```
 
 Then update `.env`:
+
 ```
 DATABASE_URL="postgresql://postgres:postgres@localhost:5433/cash_money"
 ```
 
 **For dev server (4200):**
+
 ```bash
 npx nx serve cash-money --port 4201
 ```

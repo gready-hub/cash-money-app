@@ -1,5 +1,5 @@
 export type Note = {
   id: number;
   note: string;
-  createdAt: string;
+  createdAt: Date | null;
 };

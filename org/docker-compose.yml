@@ -4,7 +4,7 @@ services:
     container_name: cash-money-postgres
     restart: unless-stopped
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -14,7 +14,7 @@ services:
       # Optional: mount init scripts
       - ./db/init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -22,7 +22,6 @@ services:
 volumes:
   postgres_data:
     driver: local
-
 # Notes for NAS migration:
 # - When moving to NAS, update the DATABASE_URL in .env to point to your NAS IP
 # - You can use the same docker-compose.yml on your NAS

@@ -7,7 +7,7 @@ import { injectTrpcClient } from '../../trpc-client';
 import { Note } from '../../note';
 
 @Component({
-  selector: 'cash-money-analog-welcome',
+  selector: 'app-analog-welcome',
 
   imports: [AsyncPipe, FormsModule, NgFor, DatePipe, NgIf],
   host: {
